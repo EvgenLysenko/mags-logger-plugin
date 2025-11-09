@@ -30,7 +30,16 @@ namespace MagsLogger
         public bool isActive = false;
 
         int magsCount = 0;
-        readonly List<float> mags = new List<float>();
+        class Mag
+        {
+            public int x = 0;
+            public int y = 0;
+            public int z = 0;
+
+            public bool isOnline = false;
+        }
+
+        readonly List<Mag> mags = new List<Mag>();
 
         public static double markerScale = 1;
 
@@ -42,6 +51,8 @@ namespace MagsLogger
         public int GpsFps { get; internal set; }
         public int AttitudeFps { get; internal set; }
         public bool LoggingStarted { get; internal set; }
+        public bool OutMagsDetected { get; internal set; }
+        public bool OutAccelDetected { get; internal set; }
 
         int getScreenLeft()
         {
@@ -76,8 +87,20 @@ namespace MagsLogger
             float y = getScreenTop() + screenHeight * startPos.Y;
 
             Brush brush = isActive ? Brushes.Orange : Brushes.Gray;
-            g.DrawString("Mags: " + MagsFps.ToString(), magsFont, brush, x, y);
+
+            String text = "Mags: ";
+            if (!OutMagsDetected && !OutAccelDetected)
+                text = "Mags No data: ";
+            else if (OutMagsDetected && OutAccelDetected)
+                text = "Mags + Accel: ";
+            else if (OutMagsDetected)
+                text = "Mags: ";
+            else if (OutAccelDetected)
+                text = "Accel: ";
+
+            g.DrawString(text + MagsFps.ToString(), magsFont, brush, x, y);
             y += magsFont.Size * 1.5f;
+
             g.DrawString("Att: " + AttitudeFps.ToString(), magsFont, brush, x, y);
             y += magsFont.Size * 1.5f;
             g.DrawString("GPS: " + GpsFps.ToString(), magsFont, brush, x, y);
@@ -86,11 +109,19 @@ namespace MagsLogger
             y += magsFont.Size * 1.5f;
             g.DrawString("Log: " + (LoggingStarted ? "Started" : "no"), magsFont, brush, x, y);
             y += magsFont.Size * 1.5f;
+            g.DrawString("Log out:" + (OutMagsDetected ? " MAGS" : "") + (OutAccelDetected ? " ACCEL" : "") + (!OutMagsDetected && !OutAccelDetected ? " NA" : ""), magsFont, brush, x, y);
+            y += magsFont.Size * 1.5f;
+
+            for (int i = 0; i < mags.Count; ++i) {
+                Mag mag = mags[i];
+                g.DrawString(String.Format("Mag {0}: {1,5} {2,5} {3,5}", i, mag.x, mag.y, mag.z), magsFont, brush, x, y);
+                y += magsFont.Size * 1.5f;
+            }
 
             int idx = 0;
-            foreach (float value in mags)
+            foreach (Mag mag in mags)
             {
-                bool isOnline = value > 0 && isActive;
+                bool isOnline = mag.isOnline && isActive;
                 Color color = isOnline ? onlineColor : offlineColor;
 
                 if (backgroundBrush != null)
@@ -99,7 +130,8 @@ namespace MagsLogger
                 g.DrawRectangle(isOnline ? onlinePen: offlinePen, x, y, width, height);
                 g.DrawString((idx + 1).ToString(), magsFont, isOnline ? onlineBrush: offlineBrush, x, y);
 
-                y += height + gap;
+                //y += height + gap;
+                x += width + gap;
                 ++idx;
             }
         }
@@ -131,7 +163,8 @@ namespace MagsLogger
 
             while (mags.Count < this.magsCount && mags.Count < MAGS_MAX_NUMBER)
             {
-                mags.Add(0);
+                Mag mag = new Mag();
+                mags.Add(mag);
             }
         }
 
@@ -140,11 +173,21 @@ namespace MagsLogger
             return this.magsCount;
         }
 
-        internal void setMagStatus(int magIdx, float value)
+        internal void setMagOnlineStatus(int magIdx, bool isOnline)
         {
             if (magIdx >= 0 && magIdx < mags.Count)
             {
-                this.mags[magIdx] = value;
+                this.mags[magIdx].isOnline = isOnline;
+            }
+        }
+
+        internal void setMagValues(int magIdx, int x, int y, int z)
+        {
+            if (magIdx >= 0 && magIdx < mags.Count)
+            {
+                this.mags[magIdx].x = x;
+                this.mags[magIdx].y = y;
+                this.mags[magIdx].z = z;
             }
         }
     }

@@ -13,7 +13,7 @@ namespace MagsLogger
     public class MagsLoggerPlugin : Plugin
     {
         private readonly string pluginName = "Mags Logger";
-        private readonly string pluginVersion = "2.0.0";
+        private readonly string pluginVersion = "2.1.2";
         private readonly string pluginAuthor = "Seaman";
 
         public override string Name { get { return pluginName; } }
@@ -25,7 +25,7 @@ namespace MagsLogger
         public static readonly MAVLink.MAV_CMD COMMAND_LONG_ID = MAVLink.MAV_CMD.USER_2;
         protected int ccr = 0;
 
-        public static long INACTIVE_TIMEOUT = 5 * 1000;
+        public static long INACTIVE_TIMEOUT = 3 * 1000;
         protected long lastActiveTime = 0;
 
         public bool isActive()
@@ -36,7 +36,6 @@ namespace MagsLogger
         public enum MagsCommandId
         {
             MAGS_MIN = 2001,
-            MAGS_MAX = 2015,
             MAGS_SENSOR1_STATUS = 2001,
             MAGS_SENSOR2_STATUS = 2002,
             MAGS_SENSOR3_STATUS = 2003,
@@ -46,12 +45,19 @@ namespace MagsLogger
             MAGS_CCR_SET = 2013,
             MAGS_SETTINGS = 2014,
             MAGS_SETTINGS_REQUEST = 2015,
-            MAGS_START_LOGGING = 2016,
+            MAGS_LOGGING_START = 2016,
+            MAGS_LOGGING_STOP = 2017,
+            MAGS_SET_OUT_MAGS = 2018,
+            MAGS_SET_OUT_ACCEL = 2019,
+            MAGS_SENSORS_VALUES = 2020,
+            MAGS_MAX,
         };
 
         static int STATUS_BIT_MAGS_ONLINE = 0x1;
         static int STATUS_BIT_GPS_ONLINE = 0x2;
         static int STATUS_BIT_LOG_STARTED = 0x4;
+        static int STATUS_BIT_OUT_MAGS = 0x8;
+        static int STATUS_BIT_OUT_ACCEL = 0x10;
 
         // CHANGE THIS TO TRUE TO USE THIS PLUGIN
         public override bool Init()
@@ -61,29 +67,29 @@ namespace MagsLogger
             return true;
         }
 
+        private void addMenu(ToolStripMenuItem mainMenu, String label, EventHandler onClick)
+        {
+            ToolStripMenuItem menu = new ToolStripMenuItem(label);
+            menu.Click += onClick;
+            mainMenu.DropDownItems.Add(menu);
+        }
+
         public override bool Loaded()
         {
             ToolStripMenuItem menu = new ToolStripMenuItem(pluginName);
 
-            ToolStripMenuItem setCcrMenu = new ToolStripMenuItem("Set CCR");
-            setCcrMenu.Click += changeCcrMenu_Click;
-            menu.DropDownItems.Add(setCcrMenu);
+            addMenu(menu, "Set CCR", changeCcrMenu_Click);
+            addMenu(menu, "Enable/Disable", enableMenu_Click);
+            addMenu(menu, "Start Logging", logStartMenu_Click);
+            addMenu(menu, "Stop Logging", logStopMenu_Click);
+            addMenu(menu, "Switch out to Mags", switchOutToMagsMenu_Click);
+            addMenu(menu, "Switch out to Accel", switchOutToAccelMenu_Click);
 
-            ToolStripMenuItem enableMenu = new ToolStripMenuItem("Enable/Disable");
-            enableMenu.Click += enableMenu_Click;
-            menu.DropDownItems.Add(enableMenu);
-
-            ToolStripMenuItem logStartMenu = new ToolStripMenuItem("Start Logging");
-            logStartMenu.Click += logStartMenu_Click;
-            menu.DropDownItems.Add(logStartMenu);
-
-            ToolStripItemCollection col = Host.FDMenuMap.Items;
-            col.Add(menu);
-
+            Host.FDMenuMap.Items.Add(menu);
 
             magsOverlay = new MagsOverlay();
             magsOverlay.IsVisibile = Settings.Instance.GetBoolean("mags_logger_enabled", true);
-;
+
             magsOverlay.zoom = Host.FDGMapControl.Zoom;
 
             Host.FDGMapControl.Overlays.Add(magsOverlay);
@@ -112,7 +118,22 @@ namespace MagsLogger
 
         void logStartMenu_Click(object sender, EventArgs e)
         {
-            sendCommand(MagsCommandId.MAGS_START_LOGGING);
+            sendCommand(MagsCommandId.MAGS_LOGGING_START);
+        }
+
+        void logStopMenu_Click(object sender, EventArgs e)
+        {
+            sendCommand(MagsCommandId.MAGS_LOGGING_STOP);
+        }
+
+        void switchOutToMagsMenu_Click(object sender, EventArgs e)
+        {
+            sendCommand(MagsCommandId.MAGS_SET_OUT_MAGS);
+        }
+
+        void switchOutToAccelMenu_Click(object sender, EventArgs e)
+        {
+            sendCommand(MagsCommandId.MAGS_SET_OUT_ACCEL);
         }
 
         void changeCcrMenu_Click(object sender, EventArgs e)
@@ -182,6 +203,8 @@ namespace MagsLogger
 
                     int status = ParseUtils.toInt(command_long.param7);
                     magsOverlay.LoggingStarted = (status & STATUS_BIT_LOG_STARTED) == STATUS_BIT_LOG_STARTED;
+                    magsOverlay.OutMagsDetected = (status & STATUS_BIT_OUT_MAGS) == STATUS_BIT_OUT_MAGS;
+                    magsOverlay.OutAccelDetected = (status & STATUS_BIT_OUT_ACCEL) == STATUS_BIT_OUT_ACCEL;
 
                     if (magsOverlay.MagsFps > 0 && ccr <= 0)
                     {
@@ -196,16 +219,16 @@ namespace MagsLogger
                     if (magIdx >= 0 && magIdx < magsOverlay.getMagsCount())
                     {
                         if (command_long.param3 >= 0)
-                            magsOverlay.setMagStatus(magIdx, command_long.param3);
+                            magsOverlay.setMagOnlineStatus(magIdx, command_long.param3 > 0);
 
                         if (++magIdx < magsOverlay.getMagsCount() && command_long.param4 >= 0)
-                            magsOverlay.setMagStatus(magIdx, command_long.param4);
+                            magsOverlay.setMagOnlineStatus(magIdx, command_long.param4 > 0);
 
                         if (++magIdx < magsOverlay.getMagsCount() && command_long.param5 >= 0)
-                            magsOverlay.setMagStatus(magIdx, command_long.param5);
+                            magsOverlay.setMagOnlineStatus(magIdx, command_long.param5 > 0);
 
                         if (++magIdx < magsOverlay.getMagsCount() && command_long.param6 >= 0)
-                            magsOverlay.setMagStatus(magIdx, command_long.param6);
+                            magsOverlay.setMagOnlineStatus(magIdx, command_long.param6 > 0);
                     }
 
                     break;
@@ -217,6 +240,20 @@ namespace MagsLogger
 
                     ccr = ParseUtils.toInt(command_long.param3);
                     magsOverlay.Ccr = ccr;
+
+                    break;
+                }
+                case MagsCommandId.MAGS_SENSORS_VALUES:
+                {
+                    int mx = ParseUtils.toInt(command_long.param2);
+                    int my = ParseUtils.toInt(command_long.param3);
+                    int mz = ParseUtils.toInt(command_long.param4);
+                    magsOverlay.setMagValues(0, mx, my, mz);
+
+                    mx = ParseUtils.toInt(command_long.param5);
+                    my = ParseUtils.toInt(command_long.param6);
+                    mz = ParseUtils.toInt(command_long.param7);
+                    magsOverlay.setMagValues(1, mx, my, mz);
 
                     break;
                 }
@@ -247,7 +284,7 @@ namespace MagsLogger
             }
         }
 
-        public void sendCommandAsync(MagsCommandId commandId, float value1 = 0, float value2 = 0, float value3 = 0)
+        public async void sendCommandAsync(MagsCommandId commandId, float value1 = 0, float value2 = 0, float value3 = 0)
         {
             if (MainV2.comPort.BaseStream == null || !Host.comPort.BaseStream.IsOpen)
             {
