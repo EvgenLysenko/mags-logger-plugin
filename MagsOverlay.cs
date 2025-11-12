@@ -39,7 +39,18 @@ namespace MagsLogger
             public bool isOnline = false;
         }
 
+        class Vector
+        {
+            public int x = 0;
+            public int y = 0;
+            public int z = 0;
+        }
+
         readonly List<Mag> mags = new List<Mag>();
+
+        Vector accel = new Vector();
+        Vector gyro = new Vector();
+        Vector accelMag = new Vector();
 
         public static double markerScale = 1;
 
@@ -112,9 +123,21 @@ namespace MagsLogger
             g.DrawString("Log out:" + (OutMagsDetected ? " MAGS" : "") + (OutAccelDetected ? " ACCEL" : "") + (!OutMagsDetected && !OutAccelDetected ? " NA" : ""), magsFont, brush, x, y);
             y += magsFont.Size * 1.5f;
 
-            for (int i = 0; i < mags.Count; ++i) {
-                Mag mag = mags[i];
-                g.DrawString(String.Format("Mag {0}: {1,5} {2,5} {3,5}", i, mag.x, mag.y, mag.z), magsFont, brush, x, y);
+            if (OutMagsDetected)
+            {
+                for (int i = 0; i < mags.Count; ++i)
+                {
+                    Mag mag = mags[i];
+                    g.DrawString(String.Format("Mag {0}: {1,5} {2,5} {3,5}", i, mag.x, mag.y, mag.z), magsFont, brush, x, y);
+                    y += magsFont.Size * 1.5f;
+                }
+            }
+
+            if (OutAccelDetected)
+            {
+                g.DrawString(String.Format("Accel: {0,5} {1,5} {2,5}", accel.x, accel.y, accel.z), magsFont, brush, x, y);
+                y += magsFont.Size * 1.5f;
+                g.DrawString(String.Format("Mag:   {0,5} {1,5} {2,5}", accelMag.x, accelMag.y, accelMag.z), magsFont, brush, x, y);
                 y += magsFont.Size * 1.5f;
             }
 
@@ -189,6 +212,27 @@ namespace MagsLogger
                 this.mags[magIdx].y = y;
                 this.mags[magIdx].z = z;
             }
+        }
+
+        internal void setAccelValues(int x, int y, int z)
+        {
+            this.accel.x = x;
+            this.accel.y = y;
+            this.accel.z = z;
+        }
+
+        internal void setGyroValues(int x, int y, int z)
+        {
+            this.gyro.x = x;
+            this.gyro.y = y;
+            this.gyro.z = z;
+        }
+
+        internal void setAccelMagValues(int x, int y, int z)
+        {
+            this.accelMag.x = x;
+            this.accelMag.y = y;
+            this.accelMag.z = z;
         }
     }
 }

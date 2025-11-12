@@ -13,7 +13,7 @@ namespace MagsLogger
     public class MagsLoggerPlugin : Plugin
     {
         private readonly string pluginName = "Mags Logger";
-        private readonly string pluginVersion = "2.1.2";
+        private readonly string pluginVersion = "2.1.3";
         private readonly string pluginAuthor = "Seaman";
 
         public override string Name { get { return pluginName; } }
@@ -49,7 +49,8 @@ namespace MagsLogger
             MAGS_LOGGING_STOP = 2017,
             MAGS_SET_OUT_MAGS = 2018,
             MAGS_SET_OUT_ACCEL = 2019,
-            MAGS_SENSORS_VALUES = 2020,
+            MAGS_MAGS_VALUES = 2020,
+            MAGS_ACCEL_VALUES = 2021,
             MAGS_MAX,
         };
 
@@ -243,7 +244,7 @@ namespace MagsLogger
 
                     break;
                 }
-                case MagsCommandId.MAGS_SENSORS_VALUES:
+                case MagsCommandId.MAGS_MAGS_VALUES:
                 {
                     int mx = ParseUtils.toInt(command_long.param2);
                     int my = ParseUtils.toInt(command_long.param3);
@@ -254,6 +255,20 @@ namespace MagsLogger
                     my = ParseUtils.toInt(command_long.param6);
                     mz = ParseUtils.toInt(command_long.param7);
                     magsOverlay.setMagValues(1, mx, my, mz);
+
+                    break;
+                }
+                case MagsCommandId.MAGS_ACCEL_VALUES:
+                {
+                    int x = ParseUtils.toInt(command_long.param2);
+                    int y = ParseUtils.toInt(command_long.param3);
+                    int z = ParseUtils.toInt(command_long.param4);
+                    magsOverlay.setAccelValues(x, y, z);
+
+                    x = ParseUtils.toInt(command_long.param5);
+                    y = ParseUtils.toInt(command_long.param6);
+                    z = ParseUtils.toInt(command_long.param7);
+                    magsOverlay.setAccelMagValues(x, y, z);
 
                     break;
                 }
