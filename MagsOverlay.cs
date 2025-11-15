@@ -59,6 +59,7 @@ namespace MagsLogger
         public int Ccr { get; internal set; }
         public bool GpsFixed { get; internal set; }
         public int MagsFps { get; internal set; }
+        public int LogoutFps { get; internal set; }
         public int GpsFps { get; internal set; }
         public int AttitudeFps { get; internal set; }
         public bool LoggingStarted { get; internal set; }
@@ -121,6 +122,8 @@ namespace MagsLogger
             g.DrawString("Log: " + (LoggingStarted ? "Started" : "no"), magsFont, brush, x, y);
             y += magsFont.Size * 1.5f;
             g.DrawString("Log out:" + (OutMagsDetected ? " MAGS" : "") + (OutAccelDetected ? " ACCEL" : "") + (!OutMagsDetected && !OutAccelDetected ? " NA" : ""), magsFont, brush, x, y);
+            y += magsFont.Size * 1.5f;
+            g.DrawString("Log fps: " + LogoutFps.ToString(), magsFont, brush, x, y);
             y += magsFont.Size * 1.5f;
 
             if (OutMagsDetected)

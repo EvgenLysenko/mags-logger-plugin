@@ -13,7 +13,7 @@ namespace MagsLogger
     public class MagsLoggerPlugin : Plugin
     {
         private readonly string pluginName = "Mags Logger";
-        private readonly string pluginVersion = "2.1.3";
+        private readonly string pluginVersion = "2.1.4";
         private readonly string pluginAuthor = "Seaman";
 
         public override string Name { get { return pluginName; } }
@@ -194,9 +194,7 @@ namespace MagsLogger
             {
                 case MagsCommandId.MAGS_STATUS:
                 {
-                    int magsCount = ParseUtils.toInt(command_long.param2);
-                    magsOverlay.setMagsCount(magsCount);
-
+                    magsOverlay.LogoutFps = ParseUtils.toInt(command_long.param2);
                     magsOverlay.GpsFixed = command_long.param3 > 0;
                     magsOverlay.MagsFps = ParseUtils.toInt(command_long.param4);
                     magsOverlay.GpsFps = ParseUtils.toInt(command_long.param5);
