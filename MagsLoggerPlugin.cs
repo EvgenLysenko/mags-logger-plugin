@@ -13,7 +13,7 @@ namespace MagsLogger
     public class MagsLoggerPlugin : Plugin
     {
         private readonly string pluginName = "Mags Logger";
-        private readonly string pluginVersion = "2.1.5";
+        private readonly string pluginVersion = "2.1.6";
         private readonly string pluginAuthor = "Seaman";
 
         public override string Name { get { return pluginName; } }
@@ -90,10 +90,15 @@ namespace MagsLogger
             addMenu(menu, "Stop Logging", logStopMenu_Click);
             addMenu(menu, "Switch out to Mags", switchOutToMagsMenu_Click);
             addMenu(menu, "Switch out to Accel", switchOutToAccelMenu_Click);
-            addMenu(menu, "Full Trace Enable", fullTraceEnableMenu_Click);
-            addMenu(menu, "Full Trace Disable", fullTraceDisableMenu_Click);
-            addMenu(menu, "Debug Trace Enable", debugTraceEnableMenu_Click);
-            addMenu(menu, "Debug Trace Disable", debugTraceDisableMenu_Click);
+
+            ToolStripMenuItem debugMenu = new ToolStripMenuItem("Debug");
+
+            addMenu(debugMenu, "Full Trace Enable", fullTraceEnableMenu_Click);
+            addMenu(debugMenu, "Full Trace Disable", fullTraceDisableMenu_Click);
+            addMenu(debugMenu, "Debug Trace Enable", debugTraceEnableMenu_Click);
+            addMenu(debugMenu, "Debug Trace Disable", debugTraceDisableMenu_Click);
+
+            menu.DropDownItems.Add(debugMenu);
 
             Host.FDMenuMap.Items.Add(menu);
 
