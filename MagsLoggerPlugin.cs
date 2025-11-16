@@ -2,11 +2,11 @@
 using System.Data;
 using System.Linq;
 using System.Text;
-using System.Windows.Forms;
-
 using MissionPlanner;
 using MissionPlanner.Plugin;
 using MissionPlanner.Utilities;
+using System.Windows.Forms;
+using static MAVLink;
 
 namespace MagsLogger
 {
@@ -20,6 +20,7 @@ namespace MagsLogger
         public override string Version { get { return pluginVersion; } }
         public override string Author { get { return pluginAuthor; } }
 
+        public readonly Plane plane = new Plane();
         internal MagsOverlay magsOverlay = null;
 
         public static readonly MAVLink.MAV_CMD COMMAND_LONG_ID = MAVLink.MAV_CMD.USER_2;
@@ -97,6 +98,7 @@ namespace MagsLogger
             Host.FDMenuMap.Items.Add(menu);
 
             magsOverlay = new MagsOverlay();
+            magsOverlay.plane = plane;
             magsOverlay.IsVisibile = Settings.Instance.GetBoolean("mags_logger_enabled", true);
 
             magsOverlay.zoom = Host.FDGMapControl.Zoom;
@@ -105,6 +107,8 @@ namespace MagsLogger
             Host.FDGMapControl.OnMapZoomChanged += FDGMapControl_OnMapZoomChanged;
 
 
+            MainV2.comPort.OnPacketReceived -= plane.onMavlinkMessageReceived;
+            MainV2.comPort.OnPacketReceived += plane.onMavlinkMessageReceived;
             MainV2.comPort.OnPacketReceived -= onMavlinkMessageReceived;
             MainV2.comPort.OnPacketReceived += onMavlinkMessageReceived;
 
