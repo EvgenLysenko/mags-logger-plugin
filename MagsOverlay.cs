@@ -60,11 +60,14 @@ namespace MagsLogger
         public bool GpsFixed { get; internal set; }
         public int MagsFps { get; internal set; }
         public int LogoutFps { get; internal set; }
+        public int LogoutTime { get; internal set; }
         public int GpsFps { get; internal set; }
         public int AttitudeFps { get; internal set; }
         public bool LoggingStarted { get; internal set; }
         public bool OutMagsDetected { get; internal set; }
         public bool OutAccelDetected { get; internal set; }
+        public bool OutFullTraceEnabled { get; internal set; }
+        public bool OutDebugTraceEnabled { get; internal set; }
 
         int getScreenLeft()
         {
@@ -121,9 +124,11 @@ namespace MagsLogger
             y += magsFont.Size * 1.5f;
             g.DrawString("Log: " + (LoggingStarted ? "Started" : "no"), magsFont, brush, x, y);
             y += magsFont.Size * 1.5f;
-            g.DrawString("Log out:" + (OutMagsDetected ? " MAGS" : "") + (OutAccelDetected ? " ACCEL" : "") + (!OutMagsDetected && !OutAccelDetected ? " NA" : ""), magsFont, brush, x, y);
+            g.DrawString("Log out:" + (OutMagsDetected ? " MAGS" : "") + (OutAccelDetected ? " ACCEL" : "") + (!OutMagsDetected && !OutAccelDetected ? " NA" : "") + (OutFullTraceEnabled? " - FULL TRACE ON" : "") + (OutDebugTraceEnabled ? " - DEBUG TRACE ON" : ""), magsFont, brush, x, y);
             y += magsFont.Size * 1.5f;
             g.DrawString("Log fps: " + LogoutFps.ToString(), magsFont, brush, x, y);
+            y += magsFont.Size * 1.5f;
+            g.DrawString("Log time: " + LogoutTime.ToString(), magsFont, brush, x, y);
             y += magsFont.Size * 1.5f;
 
             if (OutMagsDetected)

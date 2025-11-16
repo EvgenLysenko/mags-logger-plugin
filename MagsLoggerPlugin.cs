@@ -13,7 +13,7 @@ namespace MagsLogger
     public class MagsLoggerPlugin : Plugin
     {
         private readonly string pluginName = "Mags Logger";
-        private readonly string pluginVersion = "2.1.4";
+        private readonly string pluginVersion = "2.1.5";
         private readonly string pluginAuthor = "Seaman";
 
         public override string Name { get { return pluginName; } }
@@ -51,14 +51,18 @@ namespace MagsLogger
             MAGS_SET_OUT_ACCEL = 2019,
             MAGS_MAGS_VALUES = 2020,
             MAGS_ACCEL_VALUES = 2021,
+            MAGS_FULL_TRACE_ENABLE = 2022,
+            MAGS_DEBUG_ENABLE = 2023,
             MAGS_MAX,
         };
 
-        static int STATUS_BIT_MAGS_ONLINE = 0x1;
-        static int STATUS_BIT_GPS_ONLINE = 0x2;
-        static int STATUS_BIT_LOG_STARTED = 0x4;
-        static int STATUS_BIT_OUT_MAGS = 0x8;
-        static int STATUS_BIT_OUT_ACCEL = 0x10;
+        static readonly int STATUS_BIT_MAGS_ONLINE = 0x1;
+        static readonly int STATUS_BIT_GPS_ONLINE = 0x2;
+        static readonly int STATUS_BIT_LOG_STARTED = 0x4;
+        static readonly int STATUS_BIT_OUT_MAGS = 0x8;
+        static readonly int STATUS_BIT_OUT_ACCEL = 0x10;
+        static readonly int STATUS_BIT_FULL_TRACE_ENEBLED = 0x20;
+        static readonly int STATUS_BIT_DEBUG_ENABLED = 0x40;
 
         // CHANGE THIS TO TRUE TO USE THIS PLUGIN
         public override bool Init()
@@ -85,6 +89,10 @@ namespace MagsLogger
             addMenu(menu, "Stop Logging", logStopMenu_Click);
             addMenu(menu, "Switch out to Mags", switchOutToMagsMenu_Click);
             addMenu(menu, "Switch out to Accel", switchOutToAccelMenu_Click);
+            addMenu(menu, "Full Trace Enable", fullTraceEnableMenu_Click);
+            addMenu(menu, "Full Trace Disable", fullTraceDisableMenu_Click);
+            addMenu(menu, "Debug Trace Enable", debugTraceEnableMenu_Click);
+            addMenu(menu, "Debug Trace Disable", debugTraceDisableMenu_Click);
 
             Host.FDMenuMap.Items.Add(menu);
 
@@ -135,6 +143,26 @@ namespace MagsLogger
         void switchOutToAccelMenu_Click(object sender, EventArgs e)
         {
             sendCommand(MagsCommandId.MAGS_SET_OUT_ACCEL);
+        }
+
+        void fullTraceEnableMenu_Click(object sender, EventArgs e)
+        {
+            sendCommand(MagsCommandId.MAGS_FULL_TRACE_ENABLE, 1);
+        }
+
+        void fullTraceDisableMenu_Click(object sender, EventArgs e)
+        {
+            sendCommand(MagsCommandId.MAGS_FULL_TRACE_ENABLE, 0);
+        }
+
+        void debugTraceEnableMenu_Click(object sender, EventArgs e)
+        {
+            sendCommand(MagsCommandId.MAGS_DEBUG_ENABLE, 1);
+        }
+
+        void debugTraceDisableMenu_Click(object sender, EventArgs e)
+        {
+            sendCommand(MagsCommandId.MAGS_DEBUG_ENABLE, 0);
         }
 
         void changeCcrMenu_Click(object sender, EventArgs e)
@@ -195,15 +223,18 @@ namespace MagsLogger
                 case MagsCommandId.MAGS_STATUS:
                 {
                     magsOverlay.LogoutFps = ParseUtils.toInt(command_long.param2);
-                    magsOverlay.GpsFixed = command_long.param3 > 0;
+                    magsOverlay.LogoutTime = ParseUtils.toInt(command_long.param3);
                     magsOverlay.MagsFps = ParseUtils.toInt(command_long.param4);
-                    magsOverlay.GpsFps = ParseUtils.toInt(command_long.param5);
+                    magsOverlay.GpsFixed = command_long.param5 >= 0;
+                    magsOverlay.GpsFps = command_long.param5 >= 0 ? ParseUtils.toInt(command_long.param5) : 0;
                     magsOverlay.AttitudeFps = ParseUtils.toInt(command_long.param6);
 
                     int status = ParseUtils.toInt(command_long.param7);
                     magsOverlay.LoggingStarted = (status & STATUS_BIT_LOG_STARTED) == STATUS_BIT_LOG_STARTED;
                     magsOverlay.OutMagsDetected = (status & STATUS_BIT_OUT_MAGS) == STATUS_BIT_OUT_MAGS;
                     magsOverlay.OutAccelDetected = (status & STATUS_BIT_OUT_ACCEL) == STATUS_BIT_OUT_ACCEL;
+                    magsOverlay.OutFullTraceEnabled = (status & STATUS_BIT_FULL_TRACE_ENEBLED) == STATUS_BIT_FULL_TRACE_ENEBLED;
+                    magsOverlay.OutDebugTraceEnabled = (status & STATUS_BIT_DEBUG_ENABLED) == STATUS_BIT_DEBUG_ENABLED;
 
                     if (magsOverlay.MagsFps > 0 && ccr <= 0)
                     {
