@@ -17,6 +17,8 @@ namespace MagsLogger
         static readonly float magMarkerGap = .01f;
 
         static readonly Font magsFont = new Font(FontFamily.GenericMonospace, 20, FontStyle.Bold, GraphicsUnit.Point);
+        static readonly Font batFont = new Font(FontFamily.GenericSansSerif, 64, FontStyle.Bold, GraphicsUnit.Point);
+        static readonly Font batInnerFont = new Font(FontFamily.GenericSansSerif, 64, FontStyle.Regular, GraphicsUnit.Point);
 
         static readonly Color onlineColor = Color.Green;
         static readonly Color offlineColor = Color.Gray;
@@ -26,6 +28,8 @@ namespace MagsLogger
         static readonly Brush backgroundBrush = new SolidBrush(Color.FromArgb(0x30, 0xff, 0xff, 0xff));
         static readonly Brush onlineBrush = Brushes.Green;
         static readonly Brush offlineBrush = Brushes.Gray;
+
+        public Plane plane;
 
         public bool isActive = false;
 
@@ -59,11 +63,15 @@ namespace MagsLogger
         public int Ccr { get; internal set; }
         public bool GpsFixed { get; internal set; }
         public int MagsFps { get; internal set; }
+        public int LogoutFps { get; internal set; }
+        public int LogoutTime { get; internal set; }
         public int GpsFps { get; internal set; }
         public int AttitudeFps { get; internal set; }
         public bool LoggingStarted { get; internal set; }
         public bool OutMagsDetected { get; internal set; }
         public bool OutAccelDetected { get; internal set; }
+        public bool OutFullTraceEnabled { get; internal set; }
+        public bool OutDebugTraceEnabled { get; internal set; }
 
         int getScreenLeft()
         {
@@ -83,6 +91,15 @@ namespace MagsLogger
         int getScreenHeight()
         {
             return Control.Height * 2;
+        }
+
+        public string secondsToString(int seconds)
+        {
+            int hour = (seconds / 3600) % 100;
+            int min = (seconds / 60) % 60;
+            int sec = seconds % 60;
+
+            return String.Format("{0,00}:{1,00}:{2,00}", hour, min, sec);
         }
 
         public override void OnRender(IGraphics g)
@@ -120,8 +137,19 @@ namespace MagsLogger
             y += magsFont.Size * 1.5f;
             g.DrawString("Log: " + (LoggingStarted ? "Started" : "no"), magsFont, brush, x, y);
             y += magsFont.Size * 1.5f;
-            g.DrawString("Log out:" + (OutMagsDetected ? " MAGS" : "") + (OutAccelDetected ? " ACCEL" : "") + (!OutMagsDetected && !OutAccelDetected ? " NA" : ""), magsFont, brush, x, y);
+            g.DrawString("Log out:" + (OutMagsDetected ? " MAGS" : "") + (OutAccelDetected ? " ACCEL" : "") + (!OutMagsDetected && !OutAccelDetected ? " NA" : "") + (OutFullTraceEnabled? " - FULL TRACE ON" : "") + (OutDebugTraceEnabled ? " - DEBUG TRACE ON" : ""), magsFont, brush, x, y);
             y += magsFont.Size * 1.5f;
+            g.DrawString("Log fps: " + LogoutFps.ToString(), magsFont, brush, x, y);
+            y += magsFont.Size * 1.5f;
+            g.DrawString("Log time: " + secondsToString(LogoutTime), magsFont, brush, x, y);
+            y += magsFont.Size * 1.5f;
+
+            g.DrawString(plane.batteryVoltage.ToString("F2") + "v", batFont, Brushes.Black, x, y);
+            g.DrawString(plane.batteryVoltage.ToString("F2") + "v", batInnerFont, Brushes.Yellow, x, y);
+            y += batFont.Size * 1.5f;
+            g.DrawString(plane.batteryRemainingPc.ToString() + "%", batFont, Brushes.Black, x, y);
+            g.DrawString(plane.batteryRemainingPc.ToString() + "%", batInnerFont, Brushes.Yellow, x, y);
+            y += batFont.Size * 1.5f;
 
             if (OutMagsDetected)
             {
