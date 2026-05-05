@@ -13,6 +13,9 @@ namespace MagsLogger
     public class MagsLoggerPlugin : Plugin
     {
         public static MagsLoggerPlugin Instance { get; private set; }
+        private readonly TabPage tab = new TabPage();
+        private TabControl tabctrl;
+        private readonly MagsLoggerTabView magsLoggerView = new MagsLoggerTabView();
 
         private readonly string pluginName = "Mags Logger";
         private readonly string pluginVersion = "2.2.8";
@@ -107,6 +110,15 @@ namespace MagsLogger
 
             Host.FDMenuMap.Items.Add(menu);
             SoftwareConfig.AddPluginViewPage(typeof(MagsLoggerConfigView), pluginName, SoftwareConfig.pageOptions.isConnected);
+
+            Host.MainForm.FlightData.TabListOriginal.Add(tab);
+            tabctrl = Host.MainForm.FlightData.tabControlactions;
+            tab.Text = "Mags Logger";
+            tab.Name = "tabMagsLogger";
+            tab.Controls.Add(magsLoggerView);
+            magsLoggerView.Dock = DockStyle.Fill;
+            tabctrl.TabPages.Insert(5, tab);
+            ThemeManager.ApplyThemeTo(tab);
 
             magsOverlay = new MagsOverlay();
             magsOverlay.plane = plane;

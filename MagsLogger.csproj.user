@@ -5,6 +5,9 @@
     <Compile Update="MagsLoggerConfigView.cs">
       <SubType>UserControl</SubType>
     </Compile>
+    <Compile Update="MagsLoggerTabView.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
     <Compile Update="UpdateCcrForm.cs">
       <SubType>Form</SubType>
     </Compile>
