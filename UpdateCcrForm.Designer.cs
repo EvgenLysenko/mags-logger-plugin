@@ -1,4 +1,4 @@
-﻿namespace MissionPlanner
+﻿namespace MagsLogger
 {
     partial class UpdateCcrForm
     {

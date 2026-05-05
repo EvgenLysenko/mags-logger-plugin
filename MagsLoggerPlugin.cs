@@ -3,17 +3,19 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using MissionPlanner;
+using MissionPlanner.GCSViews;
 using MissionPlanner.Plugin;
 using MissionPlanner.Utilities;
 using System.Windows.Forms;
-using static MAVLink;
 
 namespace MagsLogger
 {
     public class MagsLoggerPlugin : Plugin
     {
+        public static MagsLoggerPlugin Instance { get; private set; }
+
         private readonly string pluginName = "Mags Logger";
-        private readonly string pluginVersion = "2.1.7";
+        private readonly string pluginVersion = "2.2.8";
         private readonly string pluginAuthor = "Seaman";
 
         public override string Name { get { return pluginName; } }
@@ -69,6 +71,7 @@ namespace MagsLogger
         // CHANGE THIS TO TRUE TO USE THIS PLUGIN
         public override bool Init()
         {
+            Instance = this;
             this.loopratehz = 1;
 
             return true;
@@ -103,6 +106,7 @@ namespace MagsLogger
             menu.DropDownItems.Add(debugMenu);
 
             Host.FDMenuMap.Items.Add(menu);
+            SoftwareConfig.AddPluginViewPage(typeof(MagsLoggerConfigView), pluginName, SoftwareConfig.pageOptions.isConnected);
 
             magsOverlay = new MagsOverlay();
             magsOverlay.plane = plane;
@@ -189,12 +193,26 @@ namespace MagsLogger
 
             if (form.ShowDialog() == DialogResult.OK)
             {
-                ccr = form.ccr;
+                SetCcr(form.ccr, true);
+            }
+        }
 
-                if (ccr > 0)
-                {
-                    sendCommand(MagsCommandId.MAGS_CCR_SET, ccr);
-                }
+        public int GetCcr()
+        {
+            return ccr;
+        }
+
+        public void SetCcr(int value, bool sendToCompanion)
+        {
+            ccr = Math.Max(0, value);
+            if (magsOverlay != null)
+            {
+                magsOverlay.Ccr = ccr;
+            }
+
+            if (sendToCompanion && ccr > 0)
+            {
+                sendCommand(MagsCommandId.MAGS_CCR_SET, ccr);
             }
         }
 
@@ -284,8 +302,7 @@ namespace MagsLogger
                     int magsCount = ParseUtils.toInt(command_long.param2);
                     magsOverlay.setMagsCount(magsCount);
 
-                    ccr = ParseUtils.toInt(command_long.param3);
-                    magsOverlay.Ccr = ccr;
+                    SetCcr(ParseUtils.toInt(command_long.param3), false);
 
                     break;
                 }
