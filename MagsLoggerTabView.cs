@@ -65,6 +65,13 @@ namespace MagsLogger
             };
             editButton.Click += EditButton_Click;
 
+            var requestIpButton = new MyButton
+            {
+                Text = "Request IP",
+                AutoSize = true
+            };
+            requestIpButton.Click += RequestIpButton_Click;
+
             statusLabel.AutoSize = true;
             statusLabel.Text = "Configure MagsLogger parameters.";
             valuesLabel.AutoSize = true;
@@ -74,8 +81,9 @@ namespace MagsLogger
             layout.Controls.Add(ccrNumericUpDown, 1, 0);
             layout.Controls.Add(applyButton, 2, 0);
             layout.Controls.Add(editButton, 2, 1);
-            layout.Controls.Add(statusLabel, 0, 2);
-            layout.Controls.Add(valuesLabel, 0, 3);
+            layout.Controls.Add(requestIpButton, 2, 2);
+            layout.Controls.Add(statusLabel, 0, 3);
+            layout.Controls.Add(valuesLabel, 0, 4);
             layout.SetColumnSpan(statusLabel, 3);
             layout.SetColumnSpan(valuesLabel, 3);
 
@@ -143,6 +151,19 @@ namespace MagsLogger
 
                 ccrNumericUpDown.Value = Clamp(form.ccr);
             }
+        }
+
+        private void RequestIpButton_Click(object sender, EventArgs e)
+        {
+            var plugin = MagsLoggerPlugin.Instance;
+            if (plugin == null)
+            {
+                statusLabel.Text = "MagsLogger plugin is not loaded.";
+                return;
+            }
+
+            plugin.sendCommand(MagsLoggerPlugin.MagsCommandId.MAGS_IP, 0);
+            statusLabel.Text = "IP request sent.";
         }
 
         private decimal Clamp(int value)
