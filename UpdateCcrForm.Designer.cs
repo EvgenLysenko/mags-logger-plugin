@@ -31,7 +31,8 @@
             this.okButton = new System.Windows.Forms.Button();
             this.cancelButton = new System.Windows.Forms.Button();
             this.label3 = new System.Windows.Forms.Label();
-            this.ccrTextBox = new System.Windows.Forms.TextBox();
+            this.ccrNumericUpDown = new System.Windows.Forms.NumericUpDown();
+            ((System.ComponentModel.ISupportInitialize)(this.ccrNumericUpDown)).BeginInit();
             this.SuspendLayout();
             // 
             // okButton
@@ -69,13 +70,18 @@
             this.label3.TabIndex = 9;
             this.label3.Text = "CCR:";
             // 
-            // ccrTextBox
+            // ccrNumericUpDown
             // 
-            this.ccrTextBox.Location = new System.Drawing.Point(121, 6);
-            this.ccrTextBox.Margin = new System.Windows.Forms.Padding(2);
-            this.ccrTextBox.Name = "ccrTextBox";
-            this.ccrTextBox.Size = new System.Drawing.Size(76, 20);
-            this.ccrTextBox.TabIndex = 8;
+            this.ccrNumericUpDown.Location = new System.Drawing.Point(121, 6);
+            this.ccrNumericUpDown.Margin = new System.Windows.Forms.Padding(2);
+            this.ccrNumericUpDown.Maximum = new decimal(new int[] {
+            9999,
+            0,
+            0,
+            0});
+            this.ccrNumericUpDown.Name = "ccrNumericUpDown";
+            this.ccrNumericUpDown.Size = new System.Drawing.Size(76, 20);
+            this.ccrNumericUpDown.TabIndex = 8;
             // 
             // UpdateCcrForm
             // 
@@ -85,7 +91,7 @@
             this.CancelButton = this.cancelButton;
             this.ClientSize = new System.Drawing.Size(215, 67);
             this.Controls.Add(this.label3);
-            this.Controls.Add(this.ccrTextBox);
+            this.Controls.Add(this.ccrNumericUpDown);
             this.Controls.Add(this.cancelButton);
             this.Controls.Add(this.okButton);
             this.Margin = new System.Windows.Forms.Padding(2);
@@ -94,6 +100,7 @@
             this.Text = "Input CCR";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.InputPositionForm_FormClosing);
             this.Shown += new System.EventHandler(this.InputPositionForm_Shown);
+            ((System.ComponentModel.ISupportInitialize)(this.ccrNumericUpDown)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -103,6 +110,6 @@
         private System.Windows.Forms.Button okButton;
         private System.Windows.Forms.Button cancelButton;
         private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.TextBox ccrTextBox;
+        private System.Windows.Forms.NumericUpDown ccrNumericUpDown;
     }
 }

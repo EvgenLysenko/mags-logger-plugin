@@ -26,7 +26,7 @@ namespace MissionPlanner
 
         private void UpdateDataControls()
         {
-            ccrTextBox.Text = ccr.ToString();
+            ccrNumericUpDown.Value = ccr;
         }
 
         private void okButton_Click(object sender, EventArgs e)
@@ -47,7 +47,7 @@ namespace MissionPlanner
         {
             if (this.DialogResult == DialogResult.OK)
             {
-                ccr = MagsLogger.ParseUtils.parseInt(ccrTextBox.Text, 0);
+                ccr = (int)ccrNumericUpDown.Value;
             }
         }
     }
