@@ -73,6 +73,8 @@ namespace MagsLogger
         public bool OutFullTraceEnabled { get; internal set; }
         public bool OutDebugTraceEnabled { get; internal set; }
 
+        public int[] Ip = { 0, 0, 0, 0 };
+
         int getScreenLeft()
         {
             return -Control.Width / 2;
@@ -142,6 +144,8 @@ namespace MagsLogger
             g.DrawString("Log fps: " + LogoutFps.ToString(), magsFont, brush, x, y);
             y += magsFont.Size * 1.5f;
             g.DrawString("Log time: " + secondsToString(LogoutTime), magsFont, brush, x, y);
+            y += magsFont.Size * 1.5f;
+            g.DrawString("IP: " + String.Format("{0}.{1}.{2}.{3}", Ip[0], Ip[1], Ip[2], Ip[3]), magsFont, brush, x, y);
             y += magsFont.Size * 1.5f;
 
             g.DrawString(plane.batteryVoltage.ToString("F2") + "v", batFont, Brushes.Black, x, y);

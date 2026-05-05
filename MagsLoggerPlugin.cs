@@ -54,6 +54,7 @@ namespace MagsLogger
             MAGS_ACCEL_VALUES = 2021,
             MAGS_FULL_TRACE_ENABLE = 2022,
             MAGS_DEBUG_ENABLE = 2023,
+            MAGS_IP = 2024,
             MAGS_MAX,
         };
 
@@ -97,6 +98,7 @@ namespace MagsLogger
             addMenu(debugMenu, "Full Trace Disable", fullTraceDisableMenu_Click);
             addMenu(debugMenu, "Debug Trace Enable", debugTraceEnableMenu_Click);
             addMenu(debugMenu, "Debug Trace Disable", debugTraceDisableMenu_Click);
+            addMenu(debugMenu, "Get IP", debugGetIPMenu_Click);
 
             menu.DropDownItems.Add(debugMenu);
 
@@ -172,6 +174,11 @@ namespace MagsLogger
         void debugTraceDisableMenu_Click(object sender, EventArgs e)
         {
             sendCommand(MagsCommandId.MAGS_DEBUG_ENABLE, 0);
+        }
+
+        void debugGetIPMenu_Click(object sender, EventArgs e)
+        {
+            sendCommand(MagsCommandId.MAGS_IP, 0);
         }
 
         void changeCcrMenu_Click(object sender, EventArgs e)
@@ -307,6 +314,16 @@ namespace MagsLogger
                     y = ParseUtils.toInt(command_long.param6);
                     z = ParseUtils.toInt(command_long.param7);
                     magsOverlay.setAccelMagValues(x, y, z);
+
+                    break;
+                }
+                case MagsCommandId.MAGS_IP:
+                {
+                    int ip = ParseUtils.toInt(command_long.param2);
+                    magsOverlay.Ip[0] = (int)(ip & 0xFF);
+                    magsOverlay.Ip[1] = (int)((ip >> 8) & 0xFF);
+                    magsOverlay.Ip[2] = (int)((ip >> 16) & 0xFF);
+                    magsOverlay.Ip[3] = (int)((ip >> 24) & 0xFF);
 
                     break;
                 }
