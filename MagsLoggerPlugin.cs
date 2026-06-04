@@ -8,7 +8,6 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
-using static Community.CsharpSqlite.Sqlite3;
 
 namespace MagsLogger
 {
@@ -20,7 +19,7 @@ namespace MagsLogger
         private readonly MagsLoggerTabView magsLoggerView = new MagsLoggerTabView();
 
         private readonly string pluginName = "Mags Logger";
-        private readonly string pluginVersion = "2.2.8";
+        private readonly string pluginVersion = "2.3.9";
         private readonly string pluginAuthor = "Seaman";
 
         public override string Name { get { return pluginName; } }
@@ -62,6 +61,8 @@ namespace MagsLogger
             MAGS_FULL_TRACE_ENABLE = 2022,
             MAGS_DEBUG_ENABLE = 2023,
             MAGS_IP = 2024,
+            MAGS_GPS_ON = 2025,
+            MAGS_GPS_OFF = 2026,
             MAGS_MAX,
         };
 
@@ -111,7 +112,7 @@ namespace MagsLogger
             menu.DropDownItems.Add(debugMenu);
 
             Host.FDMenuMap.Items.Add(menu);
-            SoftwareConfig.AddPluginViewPage(typeof(MagsLoggerConfigView), pluginName, SoftwareConfig.pageOptions.isConnected);
+            //SoftwareConfig.AddPluginViewPage(typeof(MagsLoggerConfigView), pluginName, SoftwareConfig.pageOptions.isConnected);
 
             Host.MainForm.FlightData.TabListOriginal.Add(tab);
             tabctrl = Host.MainForm.FlightData.tabControlactions;
@@ -257,6 +258,19 @@ namespace MagsLogger
                     }
                     break;
                 }
+                case MAVLink.MAVLINK_MSG_ID.COMMAND_INT:
+                {
+                    MAVLink.mavlink_command_int_t command_int = (MAVLink.mavlink_command_int_t)message.data;
+                    if (command_int.command == (ushort)COMMAND_LONG_ID)
+                    {
+                        MagsCommandId commandId = (MagsCommandId)ParseUtils.toInt(command_int.param1);
+                        if (commandId >= MagsCommandId.MAGS_MIN && commandId <= MagsCommandId.MAGS_MAX)
+                        {
+                            onMagsCommandIntReceived(command_int);
+                        }
+                    }
+                    break;
+                }
             }
         }
 
@@ -350,7 +364,36 @@ namespace MagsLogger
                 }
                 case MagsCommandId.MAGS_IP:
                 {
-                    int ip = ParseUtils.toInt(command_long.param2);
+                    magsOverlay.Ip[0] = ParseUtils.toInt(command_long.param3);
+                    magsOverlay.Ip[1] = ParseUtils.toInt(command_long.param4);
+                    magsOverlay.Ip[2] = ParseUtils.toInt(command_long.param5);
+                    magsOverlay.Ip[3] = ParseUtils.toInt(command_long.param6);
+
+                    if (magsOverlay.Ip[0] == 0 && magsOverlay.Ip[1] == 0 && magsOverlay.Ip[2] == 0 && magsOverlay.Ip[3] == 0)
+                    {
+                        int ip = ParseUtils.toInt(command_long.param2);
+                        magsOverlay.Ip[0] = (int)(ip & 0xFF);
+                        magsOverlay.Ip[1] = (int)((ip >> 8) & 0xFF);
+                        magsOverlay.Ip[2] = (int)((ip >> 16) & 0xFF);
+                        magsOverlay.Ip[3] = (int)((ip >> 24) & 0xFF);
+                    }
+
+                    break;
+                }
+            }
+        }
+
+        private void onMagsCommandIntReceived(MAVLink.mavlink_command_int_t command_int)
+        {
+            lastActiveTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+
+            MagsCommandId magsCommandId = (MagsCommandId)ParseUtils.toInt(command_int.param1);
+
+            switch (magsCommandId)
+            {
+                case MagsCommandId.MAGS_IP:
+                {
+                    int ip = command_int.x;
                     magsOverlay.Ip[0] = (int)(ip & 0xFF);
                     magsOverlay.Ip[1] = (int)((ip >> 8) & 0xFF);
                     magsOverlay.Ip[2] = (int)((ip >> 16) & 0xFF);

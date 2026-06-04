@@ -77,24 +77,67 @@ namespace MagsLogger
             valuesLabel.AutoSize = true;
             valuesLabel.Text = "Waiting for MagsOverlay data...";
 
+            var logStartButton = new MyButton
+            {
+                Text = "Log Start",
+                AutoSize = true
+            };
+            logStartButton.Click += logStartButton_Click;
+
+            var logStopButton = new MyButton
+            {
+                Text = "Log Stop",
+                AutoSize = true
+            };
+            logStopButton.Click += logStopButton_Click;
+
+
             layout.Controls.Add(ccrLabel, 0, 0);
             layout.Controls.Add(ccrNumericUpDown, 1, 0);
             layout.Controls.Add(applyButton, 2, 0);
             layout.Controls.Add(editButton, 2, 1);
             layout.Controls.Add(requestIpButton, 2, 2);
-            layout.Controls.Add(statusLabel, 0, 3);
-            layout.Controls.Add(valuesLabel, 0, 4);
+            layout.Controls.Add(logStartButton, 1, 2);
+            layout.Controls.Add(logStopButton, 0, 2);
+            layout.Controls.Add(statusLabel, 0, 5);
+            layout.Controls.Add(valuesLabel, 0, 6);
             layout.SetColumnSpan(statusLabel, 3);
             layout.SetColumnSpan(valuesLabel, 3);
 
-            var gpsOnButton = new MyButton { Text = "GPS src 1", AutoSize = true };
-            gpsOnButton.Click += gpsOnApplyButton_Click;
+            var gpsOnButton = new MyButton
+            {
+                Text = "GPS On",
+                AutoSize = true
+            };
+            gpsOnButton.Click += GpsOnButton_Click;
 
-            var gpsOffButton = new MyButton { Text = "GPS src 2", AutoSize = true };
-            gpsOffButton.Click += gpsOffApplyButton_Click;
+            var gpsOffButton = new MyButton
+            {
+                Text = "GPS Off",
+                AutoSize = true
+            };
+            gpsOffButton.Click += GpsOffButton_Click;
 
-            layout.Controls.Add(gpsOnButton, 1, 5);
-            layout.Controls.Add(gpsOffButton, 2, 5);
+            layout.Controls.Add(gpsOnButton, 3, 7);
+            layout.Controls.Add(gpsOffButton, 1, 7);
+
+            var gpsTestButtonsLabel = new Label
+            {
+                Text = "GPS direct commands:",
+                AutoSize = true,
+                Anchor = AnchorStyles.Left
+            };
+
+            layout.Controls.Add(gpsTestButtonsLabel, 1, 8);
+
+            var gps2OnButton = new MyButton { Text = "GPS src 1", AutoSize = true };
+            gps2OnButton.Click += gpsOnApplyButton_Click;
+
+            var gps2OffButton = new MyButton { Text = "GPS src 2", AutoSize = true };
+            gps2OffButton.Click += gpsOffApplyButton_Click;
+
+            layout.Controls.Add(gps2OnButton, 3, 9);
+            layout.Controls.Add(gps2OffButton, 1, 9);
 
 
             var gpsOnAuxButton = new MyButton { Text = "GPS AUX on", AutoSize = true };
@@ -103,8 +146,8 @@ namespace MagsLogger
             var gpsOffAuxButton = new MyButton { Text = "GPS AUX off", AutoSize = true };
             gpsOffAuxButton.Click += gpsOffAuxApplyButton_Click;
 
-            layout.Controls.Add(gpsOnAuxButton, 1, 6);
-            layout.Controls.Add(gpsOffAuxButton, 2, 6);
+            layout.Controls.Add(gpsOnAuxButton, 3, 10);
+            layout.Controls.Add(gpsOffAuxButton, 1, 10);
 
             Controls.Add(layout);
         }
@@ -181,8 +224,60 @@ namespace MagsLogger
                 return;
             }
 
-            plugin.sendCommand(MagsLoggerPlugin.MagsCommandId.MAGS_IP, 0);
+            plugin.sendCommand(MagsLoggerPlugin.MagsCommandId.MAGS_IP);
             statusLabel.Text = "IP request sent.";
+        }
+
+        private void logStartButton_Click(object sender, EventArgs e)
+        {
+            var plugin = MagsLoggerPlugin.Instance;
+            if (plugin == null)
+            {
+                statusLabel.Text = "MagsLogger plugin is not loaded.";
+                return;
+            }
+
+            plugin.sendCommand(MagsLoggerPlugin.MagsCommandId.MAGS_LOGGING_START);
+            statusLabel.Text = "Log start command sent.";
+        }
+
+        private void logStopButton_Click(object sender, EventArgs e)
+        {
+            var plugin = MagsLoggerPlugin.Instance;
+            if (plugin == null)
+            {
+                statusLabel.Text = "MagsLogger plugin is not loaded.";
+                return;
+            }
+
+            plugin.sendCommand(MagsLoggerPlugin.MagsCommandId.MAGS_LOGGING_STOP);
+            statusLabel.Text = "Log stop command sent.";
+        }
+
+        private void GpsOnButton_Click(object sender, EventArgs e)
+        {
+            var plugin = MagsLoggerPlugin.Instance;
+            if (plugin == null)
+            {
+                statusLabel.Text = "MagsLogger plugin is not loaded.";
+                return;
+            }
+
+            plugin.sendCommand(MagsLoggerPlugin.MagsCommandId.MAGS_GPS_ON);
+            statusLabel.Text = "GPS on sent.";
+        }
+
+        private void GpsOffButton_Click(object sender, EventArgs e)
+        {
+            var plugin = MagsLoggerPlugin.Instance;
+            if (plugin == null)
+            {
+                statusLabel.Text = "MagsLogger plugin is not loaded.";
+                return;
+            }
+
+            plugin.sendCommand(MagsLoggerPlugin.MagsCommandId.MAGS_GPS_OFF);
+            statusLabel.Text = "GPS off sent.";
         }
 
         private void gpsOnApplyButton_Click(object sender, EventArgs e)
