@@ -72,6 +72,20 @@ namespace MagsLogger
             };
             requestIpButton.Click += RequestIpButton_Click;
 
+            var gpsOnButton = new MyButton
+            {
+                Text = "GPS On",
+                AutoSize = true
+            };
+            gpsOnButton.Click += GpsOnButton_Click;
+
+            var gpsOffButton = new MyButton
+            {
+                Text = "GPS Off",
+                AutoSize = true
+            };
+            gpsOffButton.Click += GpsOffButton_Click;
+
             statusLabel.AutoSize = true;
             statusLabel.Text = "Configure MagsLogger parameters.";
             valuesLabel.AutoSize = true;
@@ -82,10 +96,12 @@ namespace MagsLogger
             layout.Controls.Add(applyButton, 2, 0);
             layout.Controls.Add(editButton, 2, 1);
             layout.Controls.Add(requestIpButton, 2, 2);
-            layout.Controls.Add(statusLabel, 0, 3);
-            layout.Controls.Add(valuesLabel, 0, 4);
+            layout.Controls.Add(statusLabel, 0, 5);
+            layout.Controls.Add(valuesLabel, 0, 6);
             layout.SetColumnSpan(statusLabel, 3);
             layout.SetColumnSpan(valuesLabel, 3);
+            layout.Controls.Add(gpsOnButton, 3, 7);
+            layout.Controls.Add(gpsOffButton, 1, 7);
 
             Controls.Add(layout);
         }
@@ -164,6 +180,32 @@ namespace MagsLogger
 
             plugin.sendCommand(MagsLoggerPlugin.MagsCommandId.MAGS_IP, 0);
             statusLabel.Text = "IP request sent.";
+        }
+
+        private void GpsOnButton_Click(object sender, EventArgs e)
+        {
+            var plugin = MagsLoggerPlugin.Instance;
+            if (plugin == null)
+            {
+                statusLabel.Text = "MagsLogger plugin is not loaded.";
+                return;
+            }
+
+            plugin.sendCommand(MagsLoggerPlugin.MagsCommandId.MAGS_GPS_ON, 0);
+            statusLabel.Text = "GPS on sent.";
+        }
+
+        private void GpsOffButton_Click(object sender, EventArgs e)
+        {
+            var plugin = MagsLoggerPlugin.Instance;
+            if (plugin == null)
+            {
+                statusLabel.Text = "MagsLogger plugin is not loaded.";
+                return;
+            }
+
+            plugin.sendCommand(MagsLoggerPlugin.MagsCommandId.MAGS_GPS_OFF, 0);
+            statusLabel.Text = "GPS off sent.";
         }
 
         private decimal Clamp(int value)
