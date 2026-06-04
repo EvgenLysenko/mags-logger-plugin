@@ -1,12 +1,14 @@
-﻿using System;
-using System.Data;
-using System.Linq;
-using System.Text;
-using MissionPlanner;
+﻿using MissionPlanner;
+using MissionPlanner.Controls;
 using MissionPlanner.GCSViews;
 using MissionPlanner.Plugin;
 using MissionPlanner.Utilities;
+using System;
+using System.Data;
+using System.Linq;
+using System.Text;
 using System.Windows.Forms;
+using static Community.CsharpSqlite.Sqlite3;
 
 namespace MagsLogger
 {
@@ -376,6 +378,90 @@ namespace MagsLogger
                     (int)commandId,
                     value1, value2, value3,
                     0, 0, 0, false);
+            }
+            catch
+            {
+                CustomMessageBox.Show(Strings.CommandFailed, Strings.ERROR);
+            }
+        }
+
+        public void gpsOn()
+        {
+            if (MainV2.comPort.BaseStream == null || !Host.comPort.BaseStream.IsOpen)
+            {
+                CustomMessageBox.Show(Strings.CommunicationErrorNoConnection, Strings.ERROR);
+                return;
+            }
+
+            try
+            {
+                MainV2.comPort.doCommand(
+                    (byte)MainV2.comPort.sysidcurrent,
+                    (byte)MAVLink.MAV_COMPONENT.MAV_COMP_ID_AUTOPILOT1,
+                    MAVLink.MAV_CMD.SET_EKF_SOURCE_SET,
+                    1,
+                    0,
+                    0, 0, 0, 0, 0, true);
+            }
+            catch
+            {
+                CustomMessageBox.Show(Strings.CommandFailed, Strings.ERROR);
+            }
+        }
+
+        public void gpsOff()
+        {
+            if (MainV2.comPort.BaseStream == null || !Host.comPort.BaseStream.IsOpen)
+            {
+                CustomMessageBox.Show(Strings.CommunicationErrorNoConnection, Strings.ERROR);
+                return;
+            }
+
+            try
+            {
+                MainV2.comPort.doCommand(
+                    (byte)MainV2.comPort.sysidcurrent,
+                    (byte)MAVLink.MAV_COMPONENT.MAV_COMP_ID_AUTOPILOT1,
+                    MAVLink.MAV_CMD.SET_EKF_SOURCE_SET,
+                    2,
+                    0,
+                    0, 0, 0, 0, 0, true);
+            }
+            catch
+            {
+                CustomMessageBox.Show(Strings.CommandFailed, Strings.ERROR);
+            }
+        }
+
+        public void gpsOnAux()
+        {
+            if (MainV2.comPort.BaseStream == null || !Host.comPort.BaseStream.IsOpen)
+            {
+                CustomMessageBox.Show(Strings.CommunicationErrorNoConnection, Strings.ERROR);
+                return;
+            }
+
+            try
+            {
+                MainV2.comPort.doCommand((byte)MainV2.comPort.sysidcurrent, (byte)MainV2.comPort.compidcurrent, MAVLink.MAV_CMD.DO_AUX_FUNCTION, 65, 0, 0, 0, 0, 0, 0);
+            }
+            catch
+            {
+                CustomMessageBox.Show(Strings.CommandFailed, Strings.ERROR);
+            }
+        }
+
+        public void gpsOffAux()
+        {
+            if (MainV2.comPort.BaseStream == null || !Host.comPort.BaseStream.IsOpen)
+            {
+                CustomMessageBox.Show(Strings.CommunicationErrorNoConnection, Strings.ERROR);
+                return;
+            }
+
+            try
+            {
+                MainV2.comPort.doCommand((byte)MainV2.comPort.sysidcurrent, (byte)MainV2.comPort.compidcurrent, MAVLink.MAV_CMD.DO_AUX_FUNCTION, 65, 2, 0, 0, 0, 0, 0);
             }
             catch
             {
