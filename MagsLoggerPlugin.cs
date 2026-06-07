@@ -19,7 +19,7 @@ namespace MagsLogger
         private readonly MagsLoggerTabView magsLoggerView = new MagsLoggerTabView();
 
         private readonly string pluginName = "Mags Logger";
-        private readonly string pluginVersion = "2.3.9";
+        private readonly string pluginVersion = "2.4.10";
         private readonly string pluginAuthor = "Seaman";
 
         public override string Name { get { return pluginName; } }
@@ -391,6 +391,30 @@ namespace MagsLogger
 
             switch (magsCommandId)
             {
+                case MagsCommandId.MAGS_STATUS:
+                {
+                    magsOverlay.LogoutFps = ParseUtils.toInt(command_int.param2);
+                    magsOverlay.LogoutTime = ParseUtils.toInt(command_int.param3);
+                    magsOverlay.MagsFps = ParseUtils.toInt(command_int.param4);
+                    magsOverlay.GpsFixed = command_int.y >= 0;
+                    magsOverlay.GpsFps = command_int.y;
+                    magsOverlay.AttitudeFps = ParseUtils.toInt(command_int.z);
+
+                    int status = command_int.x;
+
+                    magsOverlay.LoggingStarted = (status & STATUS_BIT_LOG_STARTED) == STATUS_BIT_LOG_STARTED;
+                    magsOverlay.OutMagsDetected = (status & STATUS_BIT_OUT_MAGS) == STATUS_BIT_OUT_MAGS;
+                    magsOverlay.OutAccelDetected = (status & STATUS_BIT_OUT_ACCEL) == STATUS_BIT_OUT_ACCEL;
+                    magsOverlay.OutFullTraceEnabled = (status & STATUS_BIT_FULL_TRACE_ENEBLED) == STATUS_BIT_FULL_TRACE_ENEBLED;
+                    magsOverlay.OutDebugTraceEnabled = (status & STATUS_BIT_DEBUG_ENABLED) == STATUS_BIT_DEBUG_ENABLED;
+
+                    if (magsOverlay.MagsFps > 0 && ccr <= 0)
+                    {
+                        sendCommand(MagsCommandId.MAGS_SETTINGS_REQUEST, ccr);
+                    }
+
+                    break;
+                }
                 case MagsCommandId.MAGS_IP:
                 {
                     int ip = command_int.x;
