@@ -40,7 +40,7 @@ namespace MagsLogger
             overlay = new GpsStatusOverlay();
             overlay.IsVisibile = true;
 
-            overlay.zoom = Host.FDGMapControl.Zoom;
+            overlay.onZoomChanged(Host.FDGMapControl.Zoom);
 
             Host.FDGMapControl.Overlays.Add(overlay);
             Host.FDGMapControl.OnMapZoomChanged += FDGMapControl_OnMapZoomChanged;
@@ -66,7 +66,7 @@ namespace MagsLogger
 
             if (overlay != null)
             {
-                if (overlay.zoom != Host.FDGMapControl.Zoom)
+                if (overlay.getZoom() != Host.FDGMapControl.Zoom)
                 {
                     overlay.onZoomChanged(Host.FDGMapControl.Zoom);
                 }

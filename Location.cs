@@ -47,7 +47,7 @@ namespace MagsLogger
             }
 
             distance = Math.Sqrt(dx * dx + dy * dy);
-            direction = Math.PI / 2 - Math.Atan2(dy, dy);
+            direction = Math.PI / 2 - Math.Atan2(dy, dx);
         }
 
         public static void getDistanceDirection(Location loc, Location loc2, out double distance, out double direction)
