@@ -29,7 +29,6 @@ namespace MagsLogger
         public readonly Plane plane = new Plane();
         internal MagsOverlay magsOverlay = null;
 
-        public static readonly MAVLink.MAV_CMD COMMAND_LONG_ID = MAVLink.MAV_CMD.USER_2;
         protected int ccr = 0;
 
         public static long INACTIVE_TIMEOUT = 3 * 1000;
@@ -39,40 +38,6 @@ namespace MagsLogger
         {
             return lastActiveTime + INACTIVE_TIMEOUT > DateTimeOffset.Now.ToUnixTimeMilliseconds();
         }
-
-        public enum MagsCommandId
-        {
-            MAGS_MIN = 2001,
-            MAGS_SENSOR1_STATUS = 2001,
-            MAGS_SENSOR2_STATUS = 2002,
-            MAGS_SENSOR3_STATUS = 2003,
-            MAGS_SENSOR4_STATUS = 2004,
-            MAGS_SENSORS_STATUS = 2011,
-            MAGS_STATUS = 2012,
-            MAGS_CCR_SET = 2013,
-            MAGS_SETTINGS = 2014,
-            MAGS_SETTINGS_REQUEST = 2015,
-            MAGS_LOGGING_START = 2016,
-            MAGS_LOGGING_STOP = 2017,
-            MAGS_SET_OUT_MAGS = 2018,
-            MAGS_SET_OUT_ACCEL = 2019,
-            MAGS_MAGS_VALUES = 2020,
-            MAGS_ACCEL_VALUES = 2021,
-            MAGS_FULL_TRACE_ENABLE = 2022,
-            MAGS_DEBUG_ENABLE = 2023,
-            MAGS_IP = 2024,
-            MAGS_GPS_ON = 2025,
-            MAGS_GPS_OFF = 2026,
-            MAGS_MAX,
-        };
-
-        static readonly int STATUS_BIT_MAGS_ONLINE = 0x1;
-        static readonly int STATUS_BIT_GPS_ONLINE = 0x2;
-        static readonly int STATUS_BIT_LOG_STARTED = 0x4;
-        static readonly int STATUS_BIT_OUT_MAGS = 0x8;
-        static readonly int STATUS_BIT_OUT_ACCEL = 0x10;
-        static readonly int STATUS_BIT_FULL_TRACE_ENEBLED = 0x20;
-        static readonly int STATUS_BIT_DEBUG_ENABLED = 0x40;
 
         // CHANGE THIS TO TRUE TO USE THIS PLUGIN
         public override bool Init()
@@ -250,7 +215,7 @@ namespace MagsLogger
                 case MAVLink.MAVLINK_MSG_ID.COMMAND_LONG:
                 {
                     MAVLink.mavlink_command_long_t command_long = (MAVLink.mavlink_command_long_t)message.data;
-                    if (command_long.command == (ushort)COMMAND_LONG_ID) {
+                    if (command_long.command == (ushort)MagsLogger.COMMAND_LONG_ID) {
                         MagsCommandId commandId = (MagsCommandId)ParseUtils.toInt(command_long.param1);
                         if (commandId >= MagsCommandId.MAGS_MIN && commandId <= MagsCommandId.MAGS_MAX) {
                             onMagsCommandReceived(command_long);
@@ -261,7 +226,7 @@ namespace MagsLogger
                 case MAVLink.MAVLINK_MSG_ID.COMMAND_INT:
                 {
                     MAVLink.mavlink_command_int_t command_int = (MAVLink.mavlink_command_int_t)message.data;
-                    if (command_int.command == (ushort)COMMAND_LONG_ID)
+                    if (command_int.command == (ushort)MagsLogger.COMMAND_LONG_ID)
                     {
                         MagsCommandId commandId = (MagsCommandId)ParseUtils.toInt(command_int.param1);
                         if (commandId >= MagsCommandId.MAGS_MIN && commandId <= MagsCommandId.MAGS_MAX)
@@ -302,11 +267,11 @@ namespace MagsLogger
                     magsOverlay.AttitudeFps = ParseUtils.toInt(command_long.param6);
 
                     int status = ParseUtils.toInt(command_long.param7);
-                    magsOverlay.LoggingStarted = (status & STATUS_BIT_LOG_STARTED) == STATUS_BIT_LOG_STARTED;
-                    magsOverlay.OutMagsDetected = (status & STATUS_BIT_OUT_MAGS) == STATUS_BIT_OUT_MAGS;
-                    magsOverlay.OutAccelDetected = (status & STATUS_BIT_OUT_ACCEL) == STATUS_BIT_OUT_ACCEL;
-                    magsOverlay.OutFullTraceEnabled = (status & STATUS_BIT_FULL_TRACE_ENEBLED) == STATUS_BIT_FULL_TRACE_ENEBLED;
-                    magsOverlay.OutDebugTraceEnabled = (status & STATUS_BIT_DEBUG_ENABLED) == STATUS_BIT_DEBUG_ENABLED;
+                    magsOverlay.LoggingStarted = (status & MagsLogger.STATUS_BIT_LOG_STARTED) == MagsLogger.STATUS_BIT_LOG_STARTED;
+                    magsOverlay.OutMagsDetected = (status & MagsLogger.STATUS_BIT_OUT_MAGS) == MagsLogger.STATUS_BIT_OUT_MAGS;
+                    magsOverlay.OutAccelDetected = (status & MagsLogger.STATUS_BIT_OUT_ACCEL) == MagsLogger.STATUS_BIT_OUT_ACCEL;
+                    magsOverlay.OutFullTraceEnabled = (status & MagsLogger.STATUS_BIT_FULL_TRACE_ENEBLED) == MagsLogger.STATUS_BIT_FULL_TRACE_ENEBLED;
+                    magsOverlay.OutDebugTraceEnabled = (status & MagsLogger.STATUS_BIT_DEBUG_ENABLED) == MagsLogger.STATUS_BIT_DEBUG_ENABLED;
 
                     if (magsOverlay.MagsFps > 0 && ccr <= 0)
                     {
@@ -412,11 +377,11 @@ namespace MagsLogger
 
                     int status = command_int.x;
 
-                    magsOverlay.LoggingStarted = (status & STATUS_BIT_LOG_STARTED) == STATUS_BIT_LOG_STARTED;
-                    magsOverlay.OutMagsDetected = (status & STATUS_BIT_OUT_MAGS) == STATUS_BIT_OUT_MAGS;
-                    magsOverlay.OutAccelDetected = (status & STATUS_BIT_OUT_ACCEL) == STATUS_BIT_OUT_ACCEL;
-                    magsOverlay.OutFullTraceEnabled = (status & STATUS_BIT_FULL_TRACE_ENEBLED) == STATUS_BIT_FULL_TRACE_ENEBLED;
-                    magsOverlay.OutDebugTraceEnabled = (status & STATUS_BIT_DEBUG_ENABLED) == STATUS_BIT_DEBUG_ENABLED;
+                    magsOverlay.LoggingStarted = (status & MagsLogger.STATUS_BIT_LOG_STARTED) == MagsLogger.STATUS_BIT_LOG_STARTED;
+                    magsOverlay.OutMagsDetected = (status & MagsLogger.STATUS_BIT_OUT_MAGS) == MagsLogger.STATUS_BIT_OUT_MAGS;
+                    magsOverlay.OutAccelDetected = (status & MagsLogger.STATUS_BIT_OUT_ACCEL) == MagsLogger.STATUS_BIT_OUT_ACCEL;
+                    magsOverlay.OutFullTraceEnabled = (status & MagsLogger.STATUS_BIT_FULL_TRACE_ENEBLED) == MagsLogger.STATUS_BIT_FULL_TRACE_ENEBLED;
+                    magsOverlay.OutDebugTraceEnabled = (status & MagsLogger.STATUS_BIT_DEBUG_ENABLED) == MagsLogger.STATUS_BIT_DEBUG_ENABLED;
 
                     if (magsOverlay.MagsFps > 0 && ccr <= 0)
                     {
@@ -451,7 +416,7 @@ namespace MagsLogger
                 MainV2.comPort.doCommand(
                     (byte)MainV2.comPort.sysidcurrent,
                     (byte)MAVLink.MAV_COMPONENT.MAV_COMP_ID_ONBOARD_COMPUTER,
-                    COMMAND_LONG_ID,
+                    MagsLogger.COMMAND_LONG_ID,
                     (int)commandId,
                     value1, value2, value3,
                     0, 0, 0, false);
@@ -559,7 +524,7 @@ namespace MagsLogger
                 MainV2.comPort.doCommandAsync(
                     (byte)MainV2.comPort.sysidcurrent,
                     (byte)MAVLink.MAV_COMPONENT.MAV_COMP_ID_ONBOARD_COMPUTER,
-                    COMMAND_LONG_ID,
+                    MagsLogger.COMMAND_LONG_ID,
                     (int)commandId,
                     value1, value2, value3,
                     0, 0, 0, false);

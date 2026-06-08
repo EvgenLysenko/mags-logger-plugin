@@ -94,6 +94,39 @@ namespace MagsLogger
                     }
                     break;
                 }
+                case MAVLink.MAVLINK_MSG_ID.COMMAND_INT:
+                {
+                    MAVLink.mavlink_command_int_t command_int = (MAVLink.mavlink_command_int_t)message.data;
+                    if (command_int.command == (ushort)MagsLogger.COMMAND_LONG_ID)
+                    {
+                        MagsCommandId commandId = (MagsCommandId)ParseUtils.toInt(command_int.param1);
+                        if (commandId >= MagsCommandId.MAGS_MIN && commandId <= MagsCommandId.MAGS_MAX)
+                        {
+                            onMagsCommandIntReceived(command_int);
+                        }
+                    }
+                    break;
+                }
+            }
+        }
+
+        private void onMagsCommandIntReceived(MAVLink.mavlink_command_int_t command_int)
+        {
+            lastActiveTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+
+            MagsCommandId magsCommandId = (MagsCommandId)ParseUtils.toInt(command_int.param1);
+
+            switch (magsCommandId)
+            {
+                case MagsCommandId.MAGS_STATUS:
+                {
+                    int status = command_int.x;
+                    GpsRequestResult result = (GpsRequestResult)((status & MagsLogger.STATUS_BIT_GPS_REQUEST_RESULT_MASK) >> MagsLogger.STATUS_BIT_GPS_REQUEST_RESULT_SHIFT);
+
+                    overlay.updateGpsStatus(result);
+
+                    break;
+                }
             }
         }
     }

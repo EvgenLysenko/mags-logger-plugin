@@ -224,7 +224,7 @@ namespace MagsLogger
                 return;
             }
 
-            plugin.sendCommand(MagsLoggerPlugin.MagsCommandId.MAGS_IP);
+            plugin.sendCommand(MagsCommandId.MAGS_IP);
             statusLabel.Text = "IP request sent.";
         }
 
@@ -237,7 +237,7 @@ namespace MagsLogger
                 return;
             }
 
-            plugin.sendCommand(MagsLoggerPlugin.MagsCommandId.MAGS_LOGGING_START);
+            plugin.sendCommand(MagsCommandId.MAGS_LOGGING_START);
             statusLabel.Text = "Log start command sent.";
         }
 
@@ -250,7 +250,7 @@ namespace MagsLogger
                 return;
             }
 
-            plugin.sendCommand(MagsLoggerPlugin.MagsCommandId.MAGS_LOGGING_STOP);
+            plugin.sendCommand(MagsCommandId.MAGS_LOGGING_STOP);
             statusLabel.Text = "Log stop command sent.";
         }
 
@@ -263,7 +263,7 @@ namespace MagsLogger
                 return;
             }
 
-            plugin.sendCommand(MagsLoggerPlugin.MagsCommandId.MAGS_GPS_ON);
+            plugin.sendCommand(MagsCommandId.MAGS_GPS_ON);
             statusLabel.Text = "GPS on sent.";
         }
 
@@ -276,7 +276,7 @@ namespace MagsLogger
                 return;
             }
 
-            plugin.sendCommand(MagsLoggerPlugin.MagsCommandId.MAGS_GPS_OFF);
+            plugin.sendCommand(MagsCommandId.MAGS_GPS_OFF);
             statusLabel.Text = "GPS off sent.";
         }
 
