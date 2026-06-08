@@ -271,6 +271,16 @@ namespace MagsLogger
                     }
                     break;
                 }
+                case MAVLink.MAVLINK_MSG_ID.GPS_RAW_INT:
+                {
+                    if (magsOverlay != null)
+                    {
+                        MAVLink.mavlink_gps_raw_int_t gps_raw = (MAVLink.mavlink_gps_raw_int_t)message.data;
+                        if (gps_raw.lat != int.MaxValue && gps_raw.lon != int.MaxValue)
+                            magsOverlay.setGpsRawPosition(gps_raw.lat / 1e7, gps_raw.lon / 1e7);
+                    }
+                    break;
+                }
             }
         }
 

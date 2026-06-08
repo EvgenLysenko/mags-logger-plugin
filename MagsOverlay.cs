@@ -1,6 +1,7 @@
 ﻿using Dronelogbook.Model;
 using GMap.NET;
 using GMap.NET.WindowsForms;
+using GMap.NET.WindowsForms.Markers;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -74,6 +75,8 @@ namespace MagsLogger
         public bool OutDebugTraceEnabled { get; internal set; }
 
         public int[] Ip = { 0, 0, 0, 0 };
+
+        GMarkerGoogle gpsRawMarker = null;
 
         int getScreenLeft()
         {
@@ -265,6 +268,28 @@ namespace MagsLogger
             this.accelMag.x = x;
             this.accelMag.y = y;
             this.accelMag.z = z;
+        }
+
+        internal void setGpsRawPosition(double lat, double lng)
+        {
+            if (double.IsNaN(lat) || double.IsNaN(lng) || (lat == 0 && lng == 0))
+                return;
+
+            PointLatLng position = new PointLatLng(lat, lng);
+
+            if (gpsRawMarker == null)
+            {
+                gpsRawMarker = new GMarkerGoogle(position, GMarkerGoogleType.blue_dot)
+                {
+                    ToolTipText = "GPS Raw",
+                    ToolTipMode = MarkerTooltipMode.OnMouseOver
+                };
+                Markers.Add(gpsRawMarker);
+            }
+            else
+            {
+                gpsRawMarker.Position = position;
+            }
         }
     }
 }
